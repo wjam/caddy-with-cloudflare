@@ -7,8 +7,10 @@ FROM caddy:2.7-alpine as main
 
 COPY --from=builder /usr/bin/caddy /usr/bin/caddy
 
-FROM main
+FROM main as test
 
 RUN caddy list-modules | grep cloudflare
+RUN touch /.test-successful
 
-FROM builder
+FROM main
+COPY --from=test /.test-successful /
