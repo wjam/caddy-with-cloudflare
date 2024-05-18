@@ -1,16 +1,41 @@
-FROM caddy:2.7.6-builder-alpine AS builder
+FROM golang:1.22 as builder
 
-RUN xcaddy build \
-    --with github.com/caddy-dns/cloudflare \
-    --with github.com/mholt/caddy-dynamicdns
+WORKDIR /src
+COPY go.mod .
+COPY go.sum .
+COPY main.go .
 
-FROM caddy:2.7.6-alpine as main
+RUN CGO_ENABLED=0 go build -o caddy -ldflags "-w -s" -trimpath -tags nobadger
 
-COPY --from=builder /usr/bin/caddy /usr/bin/caddy
+FROM alpine:3.18 as main
+
+RUN apk add --no-cache \
+	ca-certificates \
+	libcap \
+	mailcap
+
+RUN set -eux; \
+	mkdir -p \
+		/config/caddy \
+		/data/caddy \
+		/etc/caddy \
+		/usr/share/caddy
+
+EXPOSE 80
+EXPOSE 443
+EXPOSE 443/udp
+EXPOSE 2019
+
+WORKDIR /srv
+
+COPY --from=builder /src/caddy /usr/bin/caddy
+
+CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
 
 FROM main as test
 
 RUN caddy list-modules | grep cloudflare
+RUN caddy list-modules | grep dynamic_dns
 RUN touch /.test-successful
 
 FROM main
