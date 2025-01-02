@@ -7,7 +7,7 @@ COPY main.go .
 
 RUN CGO_ENABLED=0 go build -o caddy -ldflags "-w -s" -trimpath -tags nobadger
 
-FROM alpine:3.20 as main
+FROM alpine:3.21 as main
 
 RUN apk add --no-cache \
 	ca-certificates \
