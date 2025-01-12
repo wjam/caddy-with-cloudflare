@@ -1,4 +1,4 @@
-FROM golang:1.23 as builder
+FROM golang:1.23 AS builder
 
 WORKDIR /src
 COPY go.mod .
@@ -7,7 +7,7 @@ COPY main.go .
 
 RUN CGO_ENABLED=0 go build -o caddy -ldflags "-w -s" -trimpath -tags nobadger
 
-FROM alpine:3.21 as main
+FROM alpine:3.21 AS main
 
 RUN apk add --no-cache \
 	ca-certificates \
@@ -27,8 +27,8 @@ EXPOSE 443/udp
 EXPOSE 2019
 
 # See https://caddyserver.com/docs/conventions#file-locations for details
-ENV XDG_CONFIG_HOME /config
-ENV XDG_DATA_HOME /data
+ENV XDG_CONFIG_HOME=/config
+ENV XDG_DATA_HOME=/data
 
 WORKDIR /srv
 
@@ -36,7 +36,7 @@ COPY --from=builder /src/caddy /usr/bin/caddy
 
 CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
 
-FROM main as test
+FROM main AS test
 
 RUN caddy list-modules | grep cloudflare
 RUN caddy list-modules | grep dynamic_dns
