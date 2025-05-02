@@ -1,6 +1,6 @@
 module github.com/wjam/caddy-with-cloudflare
 
-go 1.23
+go 1.24
 
 require (
 	github.com/caddy-dns/cloudflare v0.0.0-20240703190432-89f16b99c18e
