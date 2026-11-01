@@ -1,4 +1,4 @@
-FROM golang:1.27.0 AS builder
+FROM golang:1.27.2 AS builder
 
 WORKDIR /src
 COPY go.mod .
@@ -7,7 +7,7 @@ COPY main.go .
 
 RUN CGO_ENABLED=0 go build -o caddy -ldflags "-w -s" -trimpath -tags nobadger
 
-FROM alpine:3.24.2 AS main
+FROM alpine:3.24.3 AS main
 
 RUN apk add --no-cache \
 	ca-certificates \
